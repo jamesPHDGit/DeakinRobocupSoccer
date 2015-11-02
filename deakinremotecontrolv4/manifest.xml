@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="deakinremotecontrolv3-f6be75">
+ <names>
+  <name lang="en_US">deakinremotecontrolv3</name>
+ </names>
+ <descriptionLanguages>
+  <language>en_US</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path=".">
+   <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
+  <dialogContent typeVersion="1.0" topicName="ExampleDialog">
+   <topic path="deakinremotecontrolv3/ExampleDialog/ExampleDialog_enu.top" language="en_US"/>
+  </dialogContent>
+ </contents>
+</package>
