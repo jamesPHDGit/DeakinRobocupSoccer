@@ -1,4 +1,4 @@
-Welcome to the rUNSWift 2014 code release repository.
+Welcome to the Deakin 2015 code release repository, which is based on UNSW code release 2014 https://github.com/UNSWComputing/rUNSWift-2014-release
 
 The directory structure is:
 
@@ -8,10 +8,10 @@ The directory structure is:
     The contents of this directory are synced to the robot with nao_sync, put custom configuration files
     or libraries here. Python code that handles behaviour decision making exists here.
 * **robot**:
-    This is the source code for the rUNSWift 2014 binaries, including our core architecture.
+    This is the source code for the Deakin 2015 binaries, including the core architecture. Once again the foundation code is from UNSW code release 2014.
 * **utils**:
     This is the source code for any off-nao utilities, such as colour
     calibration or offline debugging utilities.
 
-For more information, see the github wiki in this repository:
-https://github.com/UNSWComputing/rUNSWift-2014-release/wiki
+For more information, check documentations on https://deakin365-my.sharepoint.com/personal/xi_zheng_deakin_edu_au/Documents/Deakin-RoboCup
+
