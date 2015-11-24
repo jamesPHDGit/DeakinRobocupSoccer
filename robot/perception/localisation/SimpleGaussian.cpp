@@ -1504,6 +1504,8 @@ void SimpleGaussian::updateCovarianceWithRemoteOdometry(
 }
 
 // This is basically the A*C*Atranspose part of the motion update
+//commented by:James
+//it basically update the all the covariance information related to the ball
 void SimpleGaussian::processUpdateCovarianceMatrix(const Odometry &odometry, const double dTimeSeconds) {
    const double frictionModulation = pow(constantsProvider.get(
          LocalisationConstantsProvider::BALL_FRICTION), dTimeSeconds);
@@ -1515,7 +1517,7 @@ void SimpleGaussian::processUpdateCovarianceMatrix(const Odometry &odometry, con
       covariance(col, BALL_DX_DIM) *= frictionModulation;
       covariance(col, BALL_DY_DIM) *= frictionModulation;
    }
-
+   //duplicates
    for (unsigned row = 0; row < DIM; row++) {
       covariance(BALL_X_DIM, row) += covariance(BALL_DX_DIM, row) * dTimeSeconds * useBallVelocity;
       covariance(BALL_Y_DIM, row) += covariance(BALL_DY_DIM, row) * dTimeSeconds * useBallVelocity;
@@ -1524,6 +1526,8 @@ void SimpleGaussian::processUpdateCovarianceMatrix(const Odometry &odometry, con
    }
 }
 
+//commented by:James
+//Now update those covariance related to each robot's position
 void SimpleGaussian::additiveProcessNoiseUpdateCovarianceMatrix(
       const Odometry &odometry, const double dTimeSeconds, const bool canSeeBall,
       OdometryUpdateResult &outOdometryUpdateResult) {
@@ -1587,6 +1591,9 @@ void SimpleGaussian::additiveProcessNoiseUpdateCovarianceMatrix(
             LocalisationConstantsProvider::BALL_POS_MOTION_UPDATE_LINE_UP_COVARIANCE_C);
    }
    
+   //commented by:James
+   //duplicate entries
+   //dont get it why need it
    covariance(BALL_X_DIM, BALL_X_DIM) += bPosC * dTimeSeconds;
    covariance(BALL_Y_DIM, BALL_Y_DIM) += bPosC * dTimeSeconds;
    
@@ -1595,6 +1602,8 @@ void SimpleGaussian::additiveProcessNoiseUpdateCovarianceMatrix(
    covariance(BALL_DY_DIM, BALL_DY_DIM) += bVelC * dTimeSeconds;
 }
 
+//commented by:James
+//what is it?
 bool SimpleGaussian::goalieUpdateDisagrees(const SharedLocalisationUpdateBundle &updateBundle) const {
    double symmetricYDistance = 
          fabs(updateBundle.sharedUpdateMean(BALL_Y_DIM, 0) + mean(BALL_Y_DIM, 0));
@@ -1605,6 +1614,10 @@ bool SimpleGaussian::goalieUpdateDisagrees(const SharedLocalisationUpdateBundle 
           symmetricYDistance < 1000.0;
 }
 
+//commented by:James
+//if the ball position is detected to be so close to current robot
+//return it is too close
+//and then what?
 bool SimpleGaussian::isBallTooCloseForRemoteUpdate(void) const {
    double dx = mean(BALL_X_DIM, 0) - mean(ROBOT_X_DIM, 0);
    double dy = mean(BALL_Y_DIM, 0) - mean(ROBOT_Y_DIM, 0);
@@ -1612,6 +1625,9 @@ bool SimpleGaussian::isBallTooCloseForRemoteUpdate(void) const {
    return sqrt(dx*dx + dy*dy) < 500.0;
 }
 
+//commented by:James
+//used to normalize the robot and ball belief state
+//too big or too small, trim down to normal
 void SimpleGaussian::clipToField(Eigen::MatrixXd &pose) {
    pose(ROBOT_X_DIM, 0) = crop<double>(pose(ROBOT_X_DIM, 0), -FIELD_X_CLIP, FIELD_X_CLIP);
    pose(ROBOT_Y_DIM, 0) = crop<double>(pose(ROBOT_Y_DIM, 0), -FIELD_Y_CLIP, FIELD_Y_CLIP);
@@ -1623,8 +1639,17 @@ void SimpleGaussian::clipToField(Eigen::MatrixXd &pose) {
    pose(BALL_DY_DIM, 0) = crop<double>(pose(BALL_DY_DIM, 0), -MAX_BALL_VELOCITY, MAX_BALL_VELOCITY);
 }
 
+//commented by:James
+//calculate the distance between current robot and the ball
+//give a lower bound for the distance
+//
 void SimpleGaussian::clipBallOutOfRobot(Eigen::MatrixXd &pose) {
-   const double MIN_BALL_ROBOT_DIST = 10.0;
+    //commented by:James
+	//hard code 10??<<!!!!@#!
+	//WTH to hard code the minimum distance between ball and robot to 10
+	//10 what? 10 meters? 10 mm?
+	//very confusing
+	const double MIN_BALL_ROBOT_DIST = 10.0;
    
    double toBallX = pose(BALL_X_DIM, 0) - pose(ROBOT_X_DIM, 0);
    double toBallY = pose(BALL_Y_DIM, 0) - pose(ROBOT_Y_DIM, 0);
@@ -1637,7 +1662,7 @@ void SimpleGaussian::clipBallOutOfRobot(Eigen::MatrixXd &pose) {
          toBallY = 0.0;
          toBallLength = 1.0;
       }
-      
+      //something smelly here, WTH is the logic of determining ball x and y?
       pose(BALL_X_DIM, 0) = pose(ROBOT_X_DIM, 0) + MIN_BALL_ROBOT_DIST * toBallX / toBallLength;
       pose(BALL_Y_DIM, 0) = pose(ROBOT_Y_DIM, 0) + MIN_BALL_ROBOT_DIST * toBallY / toBallLength;
       
@@ -1647,12 +1672,20 @@ void SimpleGaussian::clipBallOutOfRobot(Eigen::MatrixXd &pose) {
 }
 
 bool SimpleGaussian::isStateValid(void) const {
+	//commented by:James
+	//weight has to between 0 and 1, which meakes sense
+	//WTH is weight != weight?
    if (weight < 0.0 || weight > 1.0 || weight != weight || !std::isfinite(weight)) {
       std::cout << "weight failed: " << weight << std::endl;
       return false;
    }
    
    for (int i = 0; i < mean.rows(); i++) {
+	   //commented by:James
+	   //strange checking, worry about multi-threaded?
+	   //this is not the propery way to do
+	   //shall use Compare and Swap!!!
+	   //WTH?
       if (mean(i, 0) != mean(i, 0) || !std::isfinite(mean(i, 0))) {
          std::cout << "mean failed: " << mean << std::endl;
          return false;
@@ -1661,6 +1694,11 @@ bool SimpleGaussian::isStateValid(void) const {
    
    for (int i = 0; i < covariance.rows(); i++) {
       for (int j = 0; j < covariance.cols(); j++) {
+   	   //commented by:James
+   	   //strange checking, worry about multi-threaded?
+   	   //this is not the propery way to do
+   	   //shall use Compare and Swap!!!
+   	   //WTH?
          if (covariance(i, j) != covariance(i, j) || !std::isfinite(covariance(i, j))) {
             std::cout << "covariance failed: " << covariance(i, j) << std::endl;
             return false;
@@ -1671,6 +1709,9 @@ bool SimpleGaussian::isStateValid(void) const {
    return true;
 }
 
+//commented by:James
+//it is hard coded position of the penalty marker
+//either plus or minus
 AbsCoord SimpleGaussian::getPenaltySpotPosition(void) {
    if (mean(ROBOT_X_DIM, 0) > FIELD_LENGTH / 5) {
       return AbsCoord(MARKER_CENTER_X, 0.0, 0.0);
@@ -1679,10 +1720,14 @@ AbsCoord SimpleGaussian::getPenaltySpotPosition(void) {
    }
 }
 
+//commented by:James
+//If the robot current position is too far to observe penalty spot
 bool SimpleGaussian::canObservePenaltySpot(void) {
    return (mean(ROBOT_X_DIM, 0) > FIELD_LENGTH/5.0) || (mean(ROBOT_X_DIM, 0) < -FIELD_LENGTH/5.0);
 }
 
+//commented by:James
+//bounded the value by epsilon
 double SimpleGaussian::getNonZero(double val) {
    if (val >= 0.0 && val < EPSILON) {
       return EPSILON;
@@ -1693,6 +1738,8 @@ double SimpleGaussian::getNonZero(double val) {
    }
 }
 
+//commented by:James
+//detect goal post position belief
 AbsCoord SimpleGaussian::getGoalpostPosition(PostType type) {
    switch(type) {
    case MY_LEFT:

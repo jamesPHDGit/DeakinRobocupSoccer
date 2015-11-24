@@ -192,13 +192,15 @@ if [ $setup -eq $TRUE ]; then
    $RSYNC_SSH root@$robot "ln -sf /lib/libbz2.so.1 /lib/libbz2.so.1.0"
 
    echo "Setting up networking"
-   $RSYNC_SSH root@$robot "ln -sf /etc/init.d/net.lo /etc/init.d/net.eth0"
-   $RSYNC_SSH root@$robot "rc-update add net.eth0 default"
-   $RSYNC_SSH root@$robot "rc-update add runswiftwireless default"
-   $RSYNC_SSH root@$robot "rc-update del connman boot"
-
-   echo "Setup finished!"
-   exit 0
+   #$RSYNC_SSH root@$robot "ln -sf /etc/init.d/net.lo /etc/init.d/net.eth0"
+   #$RSYNC_SSH root@$robot "rc-update add net.eth0 default"
+   #$RSYNC_SSH root@$robot "rc-update add runswiftwireless default"
+   #$RSYNC_SSH root@$robot "rc-update del connman boot"
+   rsync -rlptP -e "$RSYNC_SSH -l root" /deakinnao $robot:/root/deakinnao
+   $RSYNC_SSH root@$robot "ln -s /root/deakinnao/deakinconnect /etc/runlevels/boot/"
+   $RSYNC_SSH root@$robot "ln -s /root/deakinnao/deakinconnect /etc/init.d/"
+   $RSYNC_SSH root@$robot "mv /usr/sbin/wpa_supplicant /usr/sbin/wpa_supplicant.org"
+   $RSYNC_SSH root@$robot "killall wpa_supplicant /root/deakinnao/wpa_supplicant -iwlan0 -c/root/deakinnao/wpa_supplicant.conf -Dnl80211 & /sbin/dhclient wlan0"
 fi
 
    # These were from testing.

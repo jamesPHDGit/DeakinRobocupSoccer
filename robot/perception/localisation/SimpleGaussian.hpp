@@ -268,6 +268,9 @@ private:
    // creates a new id.
    SimpleGaussian(
          const unsigned dim,
+		 //this gaussian contains weight,
+		 //mean vector
+		 //and covariance matrix
          const double weight,
          const Eigen::MatrixXd &mean,
          const Eigen::MatrixXd &covariance,

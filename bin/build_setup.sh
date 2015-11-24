@@ -38,7 +38,7 @@ do
   fi
 done
 
-## TODO: remove lines from bashrc from old runswift stuff, path, etc.
+## TODO: remove lines from bashrc from old RUNSWIFT stuff, path, etc.
 
 # Set up bash
 export RUNSWIFT_CHECKOUT_DIR="${RUNSWIFT_CHECKOUT_DIR-"$(readlink -f "$(dirname $0)"/..)"}"
@@ -85,9 +85,10 @@ fi
 
 #[[ -L "$CTC_DIR"/sysroot/usr/include/boost ]] || rm -rf "$CTC_DIR"/sysroot/usr/include/boost
 myecho rsync\'ing sysroot/usr, this may take a *long* time...
-# Note: rUNSWift actually used v1.14.1 but Aldebaran no longer provides this.
+# Note: RUNSWIFT actually used v1.14.1 but Aldebaran no longer provides this.
 # We hope it's close enough to v1.14.5 that it builds and runs, it did for us
-rsync -a --stats --ignore-existing runswift.cse.unsw.edu.au::opennao-1.14.1/ "$CTC_DIR"/sysroot/usr/ --exclude portage
+#rsync -a --stats --ignore-existing runswift.cse.unsw.edu.au::opennao-1.14.1/ "$CTC_DIR"/sysroot/usr/ --exclude portage
+rsync -az --stats --ignore-existing rsync://runswift.cse.unsw.edu.au:4373/opennao-1.14.1/ "$CTC_DIR"/sysroot/usr/ --exclude portage
 
 ############ Building ###########
 

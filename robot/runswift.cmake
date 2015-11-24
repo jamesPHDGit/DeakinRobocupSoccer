@@ -149,6 +149,8 @@ ADD_LIBRARY(soccer SHARED version.cpp)
 
 find_package(PythonLibs 2 REQUIRED)
 
+#SET(PYTHON_INCLUDE_DIR /Downloads/Python-2.7.5/)
+
 ############################ INCLUDE DIRECTORY
 # Define include directories here
 set_source_files_properties(

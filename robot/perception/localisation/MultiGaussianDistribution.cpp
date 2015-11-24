@@ -62,6 +62,9 @@ struct GuassianSortFunction {
 MultiGaussianDistribution::MultiGaussianDistribution(unsigned maxGaussians, int playerNumber) :
       maxGaussians(maxGaussians), playerNumber(playerNumber) {
    MY_ASSERT(maxGaussians > 0, "invalid number of maxGaussians");
+   //Commented by:James
+   //Date: 15/Nov/2015
+   //Reset to a distributed belief state where robot stands alone with field line
    resetDistributionToPenalisedPose();
    lastObservationLikelyhood = 0.00001;
    
@@ -77,9 +80,16 @@ MultiGaussianDistribution::~MultiGaussianDistribution() {
 }
 
 void MultiGaussianDistribution::resetDistributionToPenalisedPose(void) {
-   Eigen::MatrixXd mean(MAIN_DIM, 1);
+    //Keep track of 19 belief states
+	//robox x,y,theta, four team mates' x,y,theta => 15
+	//ball x, y, dx, dy => 4
+	//another three is the shared belief
+	Eigen::MatrixXd mean(MAIN_DIM, 1);
    // Standing on the left field edge in our half looking inward.
    if (modes.size() == 0) {
+
+	   //commented by:James
+	   //the initial belief state when the robot just starts
       mean << -2.0*FIELD_LENGTH/6.0, FIELD_WIDTH/2.0, -M_PI/2.0,
               0.0, 0.0,
               0.0, 0.0,
@@ -90,13 +100,24 @@ void MultiGaussianDistribution::resetDistributionToPenalisedPose(void) {
               0.0, 0.0, 0.0,
               0.0, 0.0, 0.0;
    } else {
+	   //Commented by:James
+	   //something quite fishy about the configuration
+	   //it is ok to inherit the historical belief for the other robotos'
+	   //poses, but setting the current robot's pose belief as this?
       mean = modes.front()->getMean();
       mean(0, 0) = -FIELD_LENGTH/4.0;
       mean(1, 0) = FIELD_WIDTH/2.0;
       mean(2, 0) = -M_PI/2.0;
    }
 
+   //variance for each dimension
    Eigen::MatrixXd diagonalVariance(MAIN_DIM, 1);
+   //get95CF seems wierd
+   //where is chi square distribution
+   //isn't it shall be a range
+   //between (n-1)S^2/(1.2373) and (n-1)S^2/(1.44194)
+   //what is n
+   //and what is S^2?
    diagonalVariance << get95CF(FULL_FIELD_LENGTH/4.0), get95CF(FULL_FIELD_WIDTH/4.0), get95CF(M_PI / 4.0),
                        get95CF(10.0*FULL_FIELD_LENGTH), get95CF(10.0*FULL_FIELD_WIDTH),
                        get95CF(10000.0), get95CF(10000.0),
@@ -107,26 +128,36 @@ void MultiGaussianDistribution::resetDistributionToPenalisedPose(void) {
                        get95CF(FULL_FIELD_LENGTH), get95CF(FULL_FIELD_WIDTH), get95CF(M_PI);
 
    modes.clear();
+   //now guassian is push in
    modes.push_back(new SimpleGaussian(MAIN_DIM, 1.0/4.0, mean, diagonalVariance));
    
+   //commented by:James
+   //x field_lenth/4.0
    mean(1, 0) *= -1.0;
    mean(2, 0) *= -1.0;
    modes.push_back(new SimpleGaussian(MAIN_DIM, 1.0/4.0, mean, diagonalVariance));
    
-   
+   //commented by:James
+   //x field_length/6.0
    mean(0, 0) += FULL_FIELD_LENGTH/6.0;
    modes.push_back(new SimpleGaussian(MAIN_DIM, 1.0/4.0, mean, diagonalVariance));
    
+
    mean(1, 0) *= -1.0;
    mean(2, 0) *= -1.0;
    modes.push_back(new SimpleGaussian(MAIN_DIM, 1.0/4.0, mean, diagonalVariance));
 
-
+   //Commented by:James
+   //x -800??
+   //is it right?
    mean(0, 0) = -800;
    mean(1, 0) = 0;
    mean(2, 0) = 0;
    modes.push_back(new SimpleGaussian(MAIN_DIM, 1.0/4.0, mean, diagonalVariance));
 
+   //commented by:James
+   //x -3500?
+   //what is it?
    mean(0, 0) = -3500;
    mean(1, 0) = 0;
    mean(2, 0) = 0;
